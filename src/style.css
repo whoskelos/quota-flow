@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+/* `card` se excluye porque la guía define su propia clase `.card` (separador por hairline). */
+@plugin "daisyui" {
+  themes: false;
+  exclude: card;
+}
+
+@plugin "daisyui/theme" {
+  name: "aeria";
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #14171f;
+  --color-base-200: #1b202b;
+  --color-base-300: #242b38;
+  --color-base-content: #efe9dc;
+  --color-primary: #c8a05c;
+  --color-primary-content: #14171f;
+  --color-secondary: #8a3446;
+  --color-secondary-content: #efe9dc;
+  --color-accent: #c8a05c;
+  --color-accent-content: #14171f;
+  --color-neutral: #242b38;
+  --color-neutral-content: #efe9dc;
+  --color-info: #9aa2b1;
+  --color-info-content: #14171f;
+  --color-success: #7f9a6a;
+  --color-success-content: #14171f;
+  --color-warning: #c8a05c;
+  --color-warning-content: #14171f;
+  --color-error: #8a3446;
+  --color-error-content: #efe9dc;
+
+  --radius-selector: 1rem;
+  --radius-field: 3px;
+  --radius-box: 4px;
+
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+
+  --border: 1px;
+
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme inline {
+  --color-ink: var(--color-base-100);
+  --color-panel: var(--color-base-200);
+  --color-field: var(--color-base-300);
+  --color-gold: var(--color-primary);
+  --color-wine: var(--color-secondary);
+  --color-chalk: var(--color-base-content);
+  --color-dim: #9aa2b1;
+  --color-faint: #5f6674;
+  --color-line: rgb(239 233 220 / 0.14);
+  --color-line-strong: rgb(239 233 220 / 0.28);
+}
+
+@theme {
+  --font-sans: system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-ink font-sans text-[15px] leading-normal text-chalk antialiased;
+  }
+}
+
+@layer components {
+  .lbl {
+    @apply mb-1.5 block text-[.78rem] text-dim;
+  }
+  .inp {
+    @apply w-full rounded-[3px] border border-line bg-field px-2.5 py-2.5 text-[.95rem] text-chalk placeholder:text-faint focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-gold;
+  }
+  .card {
+    @apply border-t border-line py-8 first:border-t-0 first:pt-0;
+  }
+  .card-h2 {
+    @apply mb-1 flex items-center gap-2.5 text-[1.3rem] font-medium;
+  }
+  .card-dot {
+    @apply size-[7px] shrink-0 rounded-full bg-gold;
+  }
+  .hint {
+    @apply mb-5 max-w-[56ch] text-[.88rem] text-dim;
+  }
+  .fgrid {
+    @apply grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4;
+  }
+  .subline {
+    @apply mt-3.5 flex justify-between border-t border-dashed border-line pt-3 text-[.85rem] text-dim;
+  }
+  .subline b {
+    @apply font-semibold text-chalk;
+  }
+}

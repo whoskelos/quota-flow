@@ -1,0 +1,16 @@
+---
+description: Estilo de código JS/Vue
+alwaysApply: true
+---
+
+- Los `if` siempre llevan llaves, aunque el cuerpo sea una sola línea. Nunca `if (cond) return x;`.
+
+```js
+// Mal
+if (!activo) return 0;
+
+// Bien
+if (!activo) {
+  return 0;
+}
+```
