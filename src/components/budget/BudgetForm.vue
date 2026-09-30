@@ -11,15 +11,11 @@ import TransportSection from "./TransportSection.vue";
 import { useBudgetStore } from "@/stores/useBudgetStore";
 
 const budgetStore = useBudgetStore();
-
-const submitForm = () => {
-  console.log("submitForm");
-};
 </script>
 
 <template>
   <div class="mt-10 grid gap-10 lg:grid-cols-[1fr_328px] lg:items-start">
-    <form @submit.prevent="submitForm">
+    <form>
       <ClientEventSection />
       <OfferLinesSection />
 
