@@ -25,28 +25,32 @@ async function handleDownloadPdf() {
 }
 
 const rows = computed(() => [
-  { label: "Ofertas (con descuento)", value: budgetStore.offersDiscounted },
   { label: "Dietas", value: budgetStore.dietasTotal },
   { label: "Transporte", value: budgetStore.transporteTotal },
   { label: "Alojamiento", value: budgetStore.alojamientoTotal },
 ]);
 
 const canDownload = computed(() => {
-  const { cliente, ofertas } = budgetStore.formBudget;
+  const { cliente, opciones } = budgetStore.formBudget;
   const clientReady = [cliente.nombre, cliente.evento, cliente.titulo].every(
     (value) => value.trim() !== "",
   );
-  const lines = ofertas.lineas;
 
-  if (lines.length === 0) {
+  if (opciones.length === 0) {
     return false;
   }
 
-  const linesReady = lines.every(
-    (line) => num(line.units) > 0 && num(line.unitPrice) > 0,
-  );
+  const optionsReady = opciones.every((opcion) => {
+    if (opcion.lineas.length === 0) {
+      return false;
+    }
 
-  return clientReady && linesReady;
+    return opcion.lineas.every(
+      (line) => num(line.units) > 0 && num(line.unitPrice) > 0,
+    );
+  });
+
+  return clientReady && optionsReady;
 });
 </script>
 
@@ -62,19 +66,20 @@ const canDownload = computed(() => {
       <span>{{ row.label }}</span>
       <span>{{ formatCurrency(row.value) }}</span>
     </div>
-    <div class="flex justify-between py-2 text-sm tabular-nums">
-      <span>Subtotal</span>
-      <span>{{ formatCurrency(budgetStore.subTotal) }}</span>
+
+    <div
+      v-for="(totals, index) in budgetStore.optionTotals"
+      :key="budgetStore.formBudget.opciones[index].id"
+      class="mt-4 border-t border-line-strong pt-4"
+    >
+      <div class="text-[.82rem] text-dim">Opción {{ index + 1 }}</div>
+      <div class="mt-0.5 text-[2.1rem] font-medium tabular-nums text-gold">
+        {{ formatCurrency(totals.total) }}
+      </div>
     </div>
 
-    <div class="mt-4 border-t border-line-strong pt-4">
-      <div class="text-[.82rem] text-dim">Total</div>
-      <div class="mt-0.5 text-[2.1rem] font-medium tabular-nums text-gold">
-        {{ formatCurrency(budgetStore.total) }}
-      </div>
-      <div class="mt-0.5 text-[.82rem] text-dim">
-        {{ budgetStore.formBudget.iva }}
-      </div>
+    <div class="mt-2 text-[.82rem] text-dim">
+      {{ budgetStore.formBudget.iva }}
     </div>
 
     <button
