@@ -11,17 +11,27 @@ import TransportSection from "./TransportSection.vue";
 import { useBudgetStore } from "@/stores/useBudgetStore";
 
 const budgetStore = useBudgetStore();
-
-const submitForm = () => {
-  console.log("submitForm");
-};
 </script>
 
 <template>
   <div class="mt-10 grid gap-10 lg:grid-cols-[1fr_328px] lg:items-start">
-    <form @submit.prevent="submitForm">
+    <form>
       <ClientEventSection />
-      <OfferLinesSection />
+      <OfferLinesSection
+        v-for="(opcion, index) in budgetStore.formBudget.opciones"
+        :key="opcion.id"
+        :option-index="index"
+      />
+
+      <div class="pb-2">
+        <button
+          type="button"
+          class="rounded-[3px] border border-line-strong px-4 py-2.5 text-sm text-chalk hover:border-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          @click="budgetStore.addOption"
+        >
+          Añadir opción
+        </button>
+      </div>
 
       <ToggleSection
         v-model="budgetStore.formBudget.dietas.activo"

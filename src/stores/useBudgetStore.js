@@ -3,6 +3,12 @@ import { computed, reactive } from "vue";
 import { num } from "@/utils/parseNumber";
 
 export const useBudgetStore = defineStore("budget", () => {
+  const createOption = () => ({
+    id: crypto.randomUUID(),
+    lineas: [],
+    descuentoPct: 0,
+  });
+
   const initialState = () => ({
     cliente: {
       nombre: "",
@@ -11,7 +17,7 @@ export const useBudgetStore = defineStore("budget", () => {
       fechasEvento: "",
       titulo: "",
     },
-    ofertas: { lineas: [], descuentoPct: 0 },
+    opciones: [createOption()],
     dietas: { activo: false, personas: 0, precio: 0, dias: 1 },
     transporte: { activo: false, km: 0, precio: 0, idaVuelta: false },
     alojamiento: { activo: false, unidades: 0, precio: 0 },
@@ -21,28 +27,24 @@ export const useBudgetStore = defineStore("budget", () => {
 
   const formBudget = reactive(initialState());
 
-  const addOffer = (offer) => {
-    formBudget.ofertas.lineas.push(offer);
+  const addOption = () => {
+    formBudget.opciones.push(createOption());
   };
 
-  const removeOfferAt = (index) => {
-    formBudget.ofertas.lineas.splice(index, 1);
+  const removeOption = (optionIndex) => {
+    if (formBudget.opciones.length <= 1) {
+      return;
+    }
+    formBudget.opciones.splice(optionIndex, 1);
   };
 
-  const offersSubtotal = computed(() => {
-    return formBudget.ofertas.lineas.reduce(
-      (acc, offer) => acc + num(offer.units) * num(offer.unitPrice),
-      0,
-    );
-  });
+  const addOffer = (optionIndex, offer) => {
+    formBudget.opciones[optionIndex].lineas.push(offer);
+  };
 
-  const discountAmount = computed(() => {
-    return (offersSubtotal.value * num(formBudget.ofertas.descuentoPct)) / 100;
-  });
-
-  const offersDiscounted = computed(() => {
-    return offersSubtotal.value - discountAmount.value;
-  });
+  const removeOfferAt = (optionIndex, lineIndex) => {
+    formBudget.opciones[optionIndex].lineas.splice(lineIndex, 1);
+  };
 
   const dietasTotal = computed(() => {
     const { activo, personas, precio, dias } = formBudget.dietas;
@@ -68,33 +70,42 @@ export const useBudgetStore = defineStore("budget", () => {
     return num(unidades) * num(precio);
   });
 
-  const subTotal = computed(() => {
-    return (
-      offersDiscounted.value +
-      dietasTotal.value +
-      transporteTotal.value +
-      alojamientoTotal.value
-    );
+  const extrasTotal = computed(() => {
+    return dietasTotal.value + transporteTotal.value + alojamientoTotal.value;
   });
 
   const hasManualTotal = computed(() => num(formBudget.totalManual) > 0);
 
-  const total = computed(() =>
-    hasManualTotal.value ? num(formBudget.totalManual) : subTotal.value,
-  );
+  const optionTotals = computed(() => {
+    return formBudget.opciones.map((opcion) => {
+      const subtotal = opcion.lineas.reduce(
+        (acc, offer) => acc + num(offer.units) * num(offer.unitPrice),
+        0,
+      );
+      const discount = (subtotal * num(opcion.descuentoPct)) / 100;
+      const discounted = subtotal - discount;
+      const calculated = discounted + extrasTotal.value;
+
+      return {
+        subtotal,
+        discount,
+        discounted,
+        total: hasManualTotal.value ? num(formBudget.totalManual) : calculated,
+      };
+    });
+  });
 
   return {
     formBudget,
+    addOption,
+    removeOption,
     addOffer,
     removeOfferAt,
-    offersSubtotal,
-    discountAmount,
-    offersDiscounted,
     dietasTotal,
     transporteTotal,
     alojamientoTotal,
-    subTotal,
+    extrasTotal,
     hasManualTotal,
-    total,
+    optionTotals,
   };
 });

@@ -67,6 +67,14 @@
   body {
     @apply bg-ink font-sans text-[15px] leading-normal text-chalk antialiased;
   }
+
+  button {
+    @apply cursor-pointer;
+  }
+
+  button:disabled {
+    @apply cursor-not-allowed;
+  }
 }
 
 @layer components {

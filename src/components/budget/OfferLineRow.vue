@@ -3,9 +3,13 @@ import { useBudgetStore } from "@/stores/useBudgetStore";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { num } from "@/utils/parseNumber";
 
-defineProps({
+const props = defineProps({
   offers: {
     type: Array,
+    required: true,
+  },
+  optionIndex: {
+    type: Number,
     required: true,
   },
 });
@@ -27,9 +31,11 @@ const getLineTotal = (offer) => num(offer.units) * num(offer.unitPrice);
       class="grid gap-2.5 rounded border border-line bg-panel p-3.5 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-end"
     >
       <div>
-        <label class="lbl" :for="`o-nombre-${index}`">Nombre de la oferta</label>
+        <label class="lbl" :for="`o-nombre-${optionIndex}-${index}`">
+          Nombre de la oferta
+        </label>
         <input
-          :id="`o-nombre-${index}`"
+          :id="`o-nombre-${optionIndex}-${index}`"
           v-model="offer.name"
           type="text"
           class="inp disabled:text-dim"
@@ -38,9 +44,11 @@ const getLineTotal = (offer) => num(offer.units) * num(offer.unitPrice);
       </div>
 
       <div>
-        <label class="lbl" :for="`o-unidades-${index}`">Unidades</label>
+        <label class="lbl" :for="`o-unidades-${optionIndex}-${index}`">
+          Unidades
+        </label>
         <input
-          :id="`o-unidades-${index}`"
+          :id="`o-unidades-${optionIndex}-${index}`"
           v-model="offer.units"
           type="text"
           class="inp"
@@ -50,9 +58,11 @@ const getLineTotal = (offer) => num(offer.units) * num(offer.unitPrice);
       </div>
 
       <div>
-        <label class="lbl" :for="`o-precio-${index}`">Precio / unidad</label>
+        <label class="lbl" :for="`o-precio-${optionIndex}-${index}`">
+          Precio / unidad
+        </label>
         <input
-          :id="`o-precio-${index}`"
+          :id="`o-precio-${optionIndex}-${index}`"
           v-model="offer.unitPrice"
           type="text"
           class="inp"
@@ -72,7 +82,7 @@ const getLineTotal = (offer) => num(offer.units) * num(offer.unitPrice);
         type="button"
         aria-label="Eliminar línea"
         class="size-[34px] rounded-[3px] border border-line-strong text-base leading-none text-dim hover:border-wine hover:text-wine focus-visible:outline-2 focus-visible:outline-gold"
-        @click="budgetStore.removeOfferAt(index)"
+        @click="budgetStore.removeOfferAt(props.optionIndex, index)"
       >
         ×
       </button>

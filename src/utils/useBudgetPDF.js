@@ -100,117 +100,141 @@ export function useBudgetPdf(budget) {
     const fechaBottomY = y + 12 + lineH;
     y = Math.max(fechaBottomY, destEndY) + 8;
 
-    // --- Filas de la tabla ---
-    const body = [];
-    const rowStyles = []; // 'discount' | 'total' | null, alineado con el índice de `body`
+    const pageH = doc.internal.pageSize.getHeight();
 
-    f.ofertas.lineas.forEach((l) => {
-      body.push([
-        l.name,
-        String(num(l.units)),
-        money(num(l.unitPrice)),
-        money(num(l.units) * num(l.unitPrice)),
-      ]);
-      rowStyles.push(null);
-    });
+    f.opciones.forEach((opcion, optionIndex) => {
+      const totals = budget.optionTotals[optionIndex];
+      const body = [];
+      const rowStyles = [];
 
-    if (num(f.ofertas.descuentoPct) > 0) {
+      opcion.lineas.forEach((l) => {
+        body.push([
+          l.name,
+          String(num(l.units)),
+          money(num(l.unitPrice)),
+          money(num(l.units) * num(l.unitPrice)),
+        ]);
+        rowStyles.push(null);
+      });
+
+      if (num(opcion.descuentoPct) > 0) {
+        body.push([
+          {
+            content: `${opcion.descuentoPct}% DE DESCUENTO POR VARIOS PASES`,
+            colSpan: 3,
+          },
+          money(totals.discounted),
+        ]);
+        rowStyles.push("discount");
+      }
+
+      if (f.dietas.activo) {
+        const dias = num(f.dietas.dias) || 1;
+        body.push([
+          `Dietas ${dias} día${dias === 1 ? "" : "s"}, ${f.dietas.personas} persona${num(f.dietas.personas) === 1 ? "" : "s"}`,
+          String(num(f.dietas.personas) * dias),
+          money(num(f.dietas.precio)),
+          money(budget.dietasTotal),
+        ]);
+        rowStyles.push(null);
+      }
+
+      if (f.transporte.activo) {
+        const uds = f.transporte.idaVuelta ? 2 : 1;
+        const precioTrayecto = num(f.transporte.km) * num(f.transporte.precio);
+        body.push([
+          `Plus transporte ${f.transporte.km}km (${num(f.transporte.precio)}€/km)${f.transporte.idaVuelta ? " — ida y vuelta" : ""}`,
+          String(uds),
+          money(precioTrayecto),
+          money(budget.transporteTotal),
+        ]);
+        rowStyles.push(null);
+      }
+
+      if (f.alojamiento.activo) {
+        body.push([
+          "Alojamiento",
+          String(num(f.alojamiento.unidades)),
+          money(num(f.alojamiento.precio)),
+          money(budget.alojamientoTotal),
+        ]);
+        rowStyles.push(null);
+      }
+
       body.push([
         {
-          content: `${f.ofertas.descuentoPct}% DE DESCUENTO POR VARIOS PASES`,
+          content: "TOTAL DEL PRESUPUESTO",
           colSpan: 3,
+          styles: { halign: "center" },
         },
-        money(budget.offersDiscounted),
+        money(totals.total),
       ]);
-      rowStyles.push("discount");
-    }
+      rowStyles.push("total");
 
-    if (f.dietas.activo) {
-      const dias = num(f.dietas.dias) || 1;
-      body.push([
-        `Dietas ${dias} día${dias === 1 ? "" : "s"}, ${f.dietas.personas} persona${num(f.dietas.personas) === 1 ? "" : "s"}`,
-        String(num(f.dietas.personas) * dias),
-        money(num(f.dietas.precio)),
-        money(budget.dietasTotal),
-      ]);
-      rowStyles.push(null);
-    }
+      if (y > pageH - 40) {
+        doc.addPage();
+        y = 18;
+      }
 
-    if (f.transporte.activo) {
-      const uds = f.transporte.idaVuelta ? 2 : 1;
-      const precioTrayecto = num(f.transporte.km) * num(f.transporte.precio);
-      body.push([
-        `Plus transporte ${f.transporte.km}km (${num(f.transporte.precio)}€/km)${f.transporte.idaVuelta ? " — ida y vuelta" : ""}`,
-        String(uds),
-        money(precioTrayecto),
-        money(budget.transporteTotal),
-      ]);
-      rowStyles.push(null);
-    }
+      autoTable(doc, {
+        startY: y,
+        margin: { left: marginX, right: marginX },
+        head: [
+          [
+            `OPCIÓN ${optionIndex + 1} - DESCRIPCIÓN DEL SERVICIO A REALIZAR`,
+            "UDS",
+            "€/UD",
+            "PRECIO",
+          ],
+        ],
+        body,
+        theme: "plain",
+        styles: {
+          font: "helvetica",
+          fontSize: 9.5,
+          cellPadding: 3,
+          textColor: TEXT_DARK,
+          lineColor: [235, 235, 235],
+          lineWidth: 0.2,
+        },
+        headStyles: {
+          fillColor: TABLE_HEADER,
+          textColor: WHITE,
+          fontStyle: "bold",
+          halign: "left",
+        },
+        columnStyles: {
+          0: { cellWidth: "auto" },
+          1: { cellWidth: 16, halign: "center" },
+          2: { cellWidth: 24, halign: "right" },
+          3: { cellWidth: 26, halign: "right", fontStyle: "bold" },
+        },
+        didParseCell(data) {
+          if (data.section !== "body") {
+            return;
+          }
+          const kind = rowStyles[data.row.index];
+          if (kind === "discount") {
+            data.cell.styles.fillColor = DISCOUNT_BG;
+            data.cell.styles.fontStyle = "bold";
+          }
+          if (kind === "total") {
+            data.cell.styles.fillColor = TOTAL_BG;
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.fontSize = 10.5;
+          }
+        },
+      });
 
-    if (f.alojamiento.activo) {
-      body.push([
-        "Alojamiento",
-        String(num(f.alojamiento.unidades)),
-        money(num(f.alojamiento.precio)),
-        money(budget.alojamientoTotal),
-      ]);
-      rowStyles.push(null);
-    }
-
-    body.push([
-      {
-        content: "TOTAL DEL PRESUPUESTO",
-        colSpan: 3,
-        styles: { halign: "center" },
-      },
-      money(budget.total),
-    ]);
-    rowStyles.push("total");
-
-    autoTable(doc, {
-      startY: y,
-      margin: { left: marginX, right: marginX },
-      head: [["DESCRIPCIÓN DEL SERVICIO A REALIZAR", "UDS", "€/UD", "PRECIO"]],
-      body,
-      theme: "plain",
-      styles: {
-        font: "helvetica",
-        fontSize: 9.5,
-        cellPadding: 3,
-        textColor: TEXT_DARK,
-        lineColor: [235, 235, 235],
-        lineWidth: 0.2,
-      },
-      headStyles: {
-        fillColor: TABLE_HEADER,
-        textColor: WHITE,
-        fontStyle: "bold",
-        halign: "left",
-      },
-      columnStyles: {
-        0: { cellWidth: "auto" },
-        1: { cellWidth: 16, halign: "center" },
-        2: { cellWidth: 24, halign: "right" },
-        3: { cellWidth: 26, halign: "right", fontStyle: "bold" },
-      },
-      didParseCell(data) {
-        if (data.section !== "body") return;
-        const kind = rowStyles[data.row.index];
-        if (kind === "discount") {
-          data.cell.styles.fillColor = DISCOUNT_BG;
-          data.cell.styles.fontStyle = "bold";
-        }
-        if (kind === "total") {
-          data.cell.styles.fillColor = TOTAL_BG;
-          data.cell.styles.fontStyle = "bold";
-          data.cell.styles.fontSize = 10.5;
-        }
-      },
+      y = doc.lastAutoTable.finalY + 8;
     });
 
     // --- IVA ---
-    const finalY = doc.lastAutoTable.finalY + 10;
+    let finalY = y + 2;
+    if (finalY > pageH - 12) {
+      doc.addPage();
+      finalY = 18;
+    }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(...NAVY);
