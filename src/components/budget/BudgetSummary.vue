@@ -73,6 +73,9 @@ const canDownload = computed(() => {
       class="mt-4 border-t border-line-strong pt-4"
     >
       <div class="text-[.82rem] text-dim">Opción {{ index + 1 }}</div>
+      <div v-if="totals.isManual" class="text-[.75rem] text-gold">
+        Precio cerrado
+      </div>
       <div class="mt-0.5 text-[2.1rem] font-medium tabular-nums text-gold">
         {{ formatCurrency(totals.total) }}
       </div>
