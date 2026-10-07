@@ -59,9 +59,10 @@ const canDownload = computed(() => {
     <h2 class="mb-4 text-[1.05rem] font-medium text-dim">Resumen</h2>
 
     <div
-      v-for="row in rows"
+      v-for="(row, index) in rows"
       :key="row.label"
-      class="flex justify-between border-b border-line py-2 text-sm tabular-nums"
+      class="flex justify-between py-2 text-sm tabular-nums"
+      :class="{ 'border-b border-line': index < rows.length - 1 }"
     >
       <span>{{ row.label }}</span>
       <span>{{ formatCurrency(row.value) }}</span>
