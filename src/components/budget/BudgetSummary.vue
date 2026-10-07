@@ -59,9 +59,10 @@ const canDownload = computed(() => {
     <h2 class="mb-4 text-[1.05rem] font-medium text-dim">Resumen</h2>
 
     <div
-      v-for="row in rows"
+      v-for="(row, index) in rows"
       :key="row.label"
-      class="flex justify-between border-b border-line py-2 text-sm tabular-nums"
+      class="flex justify-between py-2 text-sm tabular-nums"
+      :class="{ 'border-b border-line': index < rows.length - 1 }"
     >
       <span>{{ row.label }}</span>
       <span>{{ formatCurrency(row.value) }}</span>
@@ -73,6 +74,9 @@ const canDownload = computed(() => {
       class="mt-4 border-t border-line-strong pt-4"
     >
       <div class="text-[.82rem] text-dim">Opción {{ index + 1 }}</div>
+      <div v-if="totals.isManual" class="text-[.75rem] text-gold">
+        Precio cerrado
+      </div>
       <div class="mt-0.5 text-[2.1rem] font-medium tabular-nums text-gold">
         {{ formatCurrency(totals.total) }}
       </div>
