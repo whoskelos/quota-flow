@@ -7,6 +7,7 @@ export const useBudgetStore = defineStore("budget", () => {
     id: crypto.randomUUID(),
     lineas: [],
     descuentoPct: 0,
+    totalManual: null,
   });
 
   const initialState = () => ({
@@ -21,7 +22,6 @@ export const useBudgetStore = defineStore("budget", () => {
     dietas: { activo: false, personas: 0, precio: 0, dias: 1 },
     transporte: { activo: false, km: 0, precio: 0, idaVuelta: false },
     alojamiento: { activo: false, unidades: 0, precio: 0 },
-    totalManual: null,
     iva: "+ IVA",
   });
 
@@ -74,8 +74,6 @@ export const useBudgetStore = defineStore("budget", () => {
     return dietasTotal.value + transporteTotal.value + alojamientoTotal.value;
   });
 
-  const hasManualTotal = computed(() => num(formBudget.totalManual) > 0);
-
   const optionTotals = computed(() => {
     return formBudget.opciones.map((opcion) => {
       const subtotal = opcion.lineas.reduce(
@@ -85,12 +83,14 @@ export const useBudgetStore = defineStore("budget", () => {
       const discount = (subtotal * num(opcion.descuentoPct)) / 100;
       const discounted = subtotal - discount;
       const calculated = discounted + extrasTotal.value;
+      const isManual = num(opcion.totalManual) > 0;
 
       return {
         subtotal,
         discount,
         discounted,
-        total: hasManualTotal.value ? num(formBudget.totalManual) : calculated,
+        total: isManual ? num(opcion.totalManual) : calculated,
+        isManual,
       };
     });
   });
@@ -105,7 +105,6 @@ export const useBudgetStore = defineStore("budget", () => {
     transporteTotal,
     alojamientoTotal,
     extrasTotal,
-    hasManualTotal,
     optionTotals,
   };
 });

@@ -117,7 +117,7 @@ export function useBudgetPdf(budget) {
         rowStyles.push(null);
       });
 
-      if (num(opcion.descuentoPct) > 0) {
+      if (num(opcion.descuentoPct) > 0 && !totals.isManual) {
         body.push([
           {
             content: `${opcion.descuentoPct}% DE DESCUENTO POR VARIOS PASES`,
@@ -163,7 +163,9 @@ export function useBudgetPdf(budget) {
 
       body.push([
         {
-          content: "TOTAL DEL PRESUPUESTO",
+          content: totals.isManual
+            ? "PRECIO CERRADO"
+            : "TOTAL DEL PRESUPUESTO",
           colSpan: 3,
           styles: { halign: "center" },
         },

@@ -107,7 +107,7 @@ const handleRemoveOption = () => {
           v-model="option.descuentoPct"
           type="text"
           class="inp disabled:opacity-50"
-          :disabled="budgetStore.hasManualTotal"
+          :disabled="totals.isManual"
           inputmode="decimal"
           placeholder="0"
         />
@@ -120,10 +120,28 @@ const handleRemoveOption = () => {
         <span>Subtotal de ofertas con descuento</span>
         <b>{{ formatCurrency(totals.discounted) }}</b>
       </div>
-      <p v-if="budgetStore.hasManualTotal" class="mt-2 text-[.8rem] text-gold">
+      <p v-if="totals.isManual" class="mt-2 text-[.8rem] text-gold">
         El total manual sustituye al cálculo automático; este descuento no se
         aplica.
       </p>
+
+      <div class="mt-4 max-w-[240px]">
+        <label class="lbl" :for="`f-manual-${optionIndex}`">
+          Total manual de esta opción (€)
+        </label>
+        <input
+          :id="`f-manual-${optionIndex}`"
+          v-model="option.totalManual"
+          type="text"
+          class="inp"
+          inputmode="decimal"
+          placeholder="Vacío para calcular automáticamente"
+        />
+        <p class="mt-2 text-[.8rem] text-dim">
+          Si lo rellenas, sustituye al cálculo de esta opción. Las demás siguen
+          calculándose solas.
+        </p>
+      </div>
     </div>
   </section>
 </template>
