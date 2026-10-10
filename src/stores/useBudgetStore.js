@@ -95,6 +95,37 @@ export const useBudgetStore = defineStore("budget", () => {
     });
   });
 
+  const canDownload = computed(() => {
+    const { cliente, opciones } = formBudget;
+    const clientReady = [cliente.nombre, cliente.evento, cliente.titulo].every(
+      (value) => value.trim() !== "",
+    );
+
+    if (!clientReady || opciones.length === 0) {
+      return false;
+    }
+
+    return opciones.every((opcion, index) => {
+      if (opcion.lineas.length === 0) {
+        return false;
+      }
+
+      const isManual = optionTotals.value[index].isManual;
+
+      return opcion.lineas.every((line) => {
+        if (num(line.units) <= 0) {
+          return false;
+        }
+
+        if (isManual) {
+          return true;
+        }
+
+        return num(line.unitPrice) > 0;
+      });
+    });
+  });
+
   return {
     formBudget,
     addOption,
@@ -106,5 +137,6 @@ export const useBudgetStore = defineStore("budget", () => {
     alojamientoTotal,
     extrasTotal,
     optionTotals,
+    canDownload,
   };
 });
