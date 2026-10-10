@@ -13,8 +13,12 @@ const model = defineModel({ type: Boolean, default: false });
 
 <template>
   <section class="card">
-    <div class="mb-4 flex items-center justify-between gap-4">
-      <h2 class="card-h2 !mb-0"><span class="card-dot"></span>{{ label }}</h2>
+    <div
+      class="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
+    >
+      <h2 class="card-h2 !mb-0 min-w-0 flex-1">
+        <span class="card-dot"></span>{{ label }}
+      </h2>
       <ToggleSwitch v-model="model" :label="label" />
     </div>
 

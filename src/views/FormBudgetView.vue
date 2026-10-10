@@ -4,10 +4,10 @@ import BudgetForm from "@/components/budget/BudgetForm.vue";
 
 <template>
   <div
-    class="mx-auto max-w-[1180px] px-4 pb-16 pt-[env(safe-area-inset-top)] sm:px-6"
+    class="mx-auto max-w-[1180px] min-w-0 overflow-x-clip px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-6"
   >
     <header
-      class="relative flex flex-col gap-1.5 border-b border-line pb-10 pt-10 sm:pt-14"
+      class="relative flex flex-col gap-1.5 border-b border-line pb-6 pt-6 sm:pb-10 sm:pt-10 md:pt-14"
     >
       <svg
         width="34"
@@ -40,7 +40,7 @@ import BudgetForm from "@/components/budget/BudgetForm.vue";
         y el total se calcula solo.
       </p>
       <svg
-        class="absolute right-0 top-8 hidden h-[120px] w-[180px] opacity-50 sm:block"
+        class="pointer-events-none absolute right-0 top-6 hidden h-[100px] w-[150px] opacity-40 md:top-8 md:block md:h-[120px] md:w-[180px] md:opacity-50"
         viewBox="0 0 180 120"
         fill="none"
         aria-hidden="true"

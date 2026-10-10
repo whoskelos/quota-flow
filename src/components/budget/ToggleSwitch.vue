@@ -10,7 +10,9 @@ const model = defineModel({ type: Boolean, default: false });
 </script>
 
 <template>
-  <label class="relative h-6 w-[42px] shrink-0">
+  <label
+    class="relative flex size-11 shrink-0 cursor-pointer items-center justify-center"
+  >
     <input
       v-model="model"
       type="checkbox"
@@ -19,10 +21,11 @@ const model = defineModel({ type: Boolean, default: false });
       class="peer absolute inset-0 z-10 m-0 cursor-pointer opacity-0"
     />
     <span
-      class="absolute inset-0 rounded-full border border-line-strong bg-field transition-colors peer-checked:border-gold peer-checked:bg-gold/25 peer-focus-visible:outline-2 peer-focus-visible:outline-gold"
-    ></span>
-    <span
-      class="absolute left-[3px] top-[3px] size-[18px] rounded-full bg-dim transition peer-checked:translate-x-[18px] peer-checked:bg-gold"
-    ></span>
+      class="relative flex h-6 w-[42px] items-center rounded-full border border-line-strong bg-field px-[3px] transition-colors peer-checked:border-gold peer-checked:bg-gold/25 peer-checked:[&>span]:translate-x-[18px] peer-checked:[&>span]:bg-gold peer-focus-visible:outline-2 peer-focus-visible:outline-gold"
+    >
+      <span
+        class="size-[18px] shrink-0 rounded-full bg-dim transition-transform"
+      ></span>
+    </span>
   </label>
 </template>
