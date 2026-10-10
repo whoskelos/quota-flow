@@ -46,14 +46,16 @@ const handleRemoveOption = () => {
 
 <template>
   <section class="card">
-    <div class="mb-1 flex items-center justify-between gap-3">
+    <div
+      class="mb-1 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3"
+    >
       <h2 class="card-h2">
         <span class="card-dot"></span>Opción {{ optionIndex + 1 }}
       </h2>
       <button
         v-if="canRemove"
         type="button"
-        class="rounded-[3px] border border-line-strong px-3 py-1.5 text-[.82rem] text-dim hover:border-wine hover:text-wine focus-visible:outline-2 focus-visible:outline-gold"
+        class="min-h-11 shrink-0 self-start rounded-[3px] border border-line-strong px-3 py-2 text-[.82rem] text-dim hover:border-wine hover:text-wine focus-visible:outline-2 focus-visible:outline-gold sm:min-h-0 sm:py-1.5"
         @click="handleRemoveOption"
       >
         Quitar opción
@@ -64,18 +66,36 @@ const handleRemoveOption = () => {
       con precios distintos.
     </p>
 
-    <ul v-if="optionIndex === 0" class="mb-5 grid gap-2">
+    <details v-if="optionIndex === 0" class="mb-5 lg:hidden">
+      <summary
+        class="cursor-pointer text-[.88rem] text-dim marker:text-faint hover:text-chalk"
+      >
+        Ver catálogo de pases
+      </summary>
+      <ul class="mt-3 grid gap-2">
+        <li
+          v-for="item in offerCatalog"
+          :key="item.id"
+          class="border-l-2 border-line-strong pl-3 text-[.82rem] break-words text-dim"
+        >
+          <b class="font-semibold text-chalk">{{ item.name }}</b> —
+          {{ item.description }}
+        </li>
+      </ul>
+    </details>
+
+    <ul v-if="optionIndex === 0" class="mb-5 hidden gap-2 lg:grid">
       <li
         v-for="item in offerCatalog"
-        :key="item.id"
-        class="border-l-2 border-line-strong pl-3 text-[.82rem] text-dim"
+        :key="`desktop-${item.id}`"
+        class="border-l-2 border-line-strong pl-3 text-[.82rem] break-words text-dim"
       >
         <b class="font-semibold text-chalk">{{ item.name }}</b> —
         {{ item.description }}
       </li>
     </ul>
 
-    <div class="mb-5 max-w-sm">
+    <div class="mb-5 w-full max-w-md">
       <label class="lbl" :for="`add-offer-${optionIndex}`">Añadir oferta</label>
       <select
         :id="`add-offer-${optionIndex}`"
@@ -98,7 +118,7 @@ const handleRemoveOption = () => {
     </div>
 
     <div class="mt-4 border-t border-line pt-4">
-      <div class="max-w-[240px]">
+      <div class="w-full sm:max-w-[240px]">
         <label class="lbl" :for="`f-descuento-${optionIndex}`">
           Descuento sobre este subtotal (%)
         </label>
@@ -125,7 +145,7 @@ const handleRemoveOption = () => {
         aplica.
       </p>
 
-      <div class="mt-4 max-w-[240px]">
+      <div class="mt-4 w-full sm:max-w-[240px]">
         <label class="lbl" :for="`f-manual-${optionIndex}`">
           Total manual de esta opción (€)
         </label>

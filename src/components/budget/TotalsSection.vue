@@ -9,7 +9,7 @@ const budgetStore = useBudgetStore();
   <section class="card">
     <h2 class="card-h2"><span class="card-dot"></span>IVA</h2>
 
-    <div class="max-w-[240px]">
+    <div class="w-full sm:max-w-[240px]">
       <label class="lbl" for="f-iva">IVA</label>
       <select id="f-iva" v-model="budgetStore.formBudget.iva" class="inp">
         <option v-for="iva in ivaCatalog" :key="iva.id" :value="iva.name">
