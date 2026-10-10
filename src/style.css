@@ -82,13 +82,13 @@
     @apply mb-1.5 block text-[.78rem] text-dim;
   }
   .inp {
-    @apply w-full rounded-[3px] border border-line bg-field px-2.5 py-2.5 text-[.95rem] text-chalk placeholder:text-faint focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-gold;
+    @apply w-full rounded-[3px] border border-line bg-field px-3 py-2.5 text-base text-chalk placeholder:text-faint focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-gold sm:text-[.95rem];
   }
   .card {
-    @apply border-t border-line py-8 first:border-t-0 first:pt-0;
+    @apply border-t border-line py-6 first:border-t-0 first:pt-0 sm:py-8;
   }
   .card-h2 {
-    @apply mb-1 flex items-center gap-2.5 text-[1.3rem] font-medium;
+    @apply mb-1 flex min-w-0 items-center gap-2.5 text-[1.15rem] font-medium sm:text-[1.3rem];
   }
   .card-dot {
     @apply size-[7px] shrink-0 rounded-full bg-gold;
@@ -97,10 +97,10 @@
     @apply mb-5 max-w-[56ch] text-[.88rem] text-dim;
   }
   .fgrid {
-    @apply grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4;
+    @apply grid grid-cols-1 gap-4 min-[520px]:grid-cols-2;
   }
   .subline {
-    @apply mt-3.5 flex justify-between border-t border-dashed border-line pt-3 text-[.85rem] text-dim;
+    @apply mt-3.5 flex flex-col gap-1 border-t border-dashed border-line pt-3 text-[.85rem] text-dim min-[420px]:flex-row min-[420px]:items-baseline min-[420px]:justify-between min-[420px]:gap-4;
   }
   .subline b {
     @apply font-semibold text-chalk;

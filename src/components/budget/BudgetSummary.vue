@@ -32,7 +32,9 @@ const rows = computed(() => [
 </script>
 
 <template>
-  <aside class="rounded border border-line bg-panel p-6 lg:sticky lg:top-6">
+  <aside
+    class="min-w-0 rounded border border-line bg-panel p-4 sm:p-6 lg:sticky lg:top-6"
+  >
     <h2 class="mb-4 text-[1.05rem] font-medium text-dim">Resumen</h2>
 
     <div
@@ -54,7 +56,9 @@ const rows = computed(() => [
       <div v-if="totals.isManual" class="text-[.75rem] text-gold">
         Precio cerrado
       </div>
-      <div class="mt-0.5 text-[2.1rem] font-medium tabular-nums text-gold">
+      <div
+        class="mt-0.5 text-[clamp(1.5rem,7vw,2.1rem)] font-medium tabular-nums text-gold"
+      >
         {{ formatCurrency(totals.total) }}
       </div>
     </div>
@@ -65,7 +69,7 @@ const rows = computed(() => [
 
     <button
       type="button"
-      class="mt-5 w-full rounded-[3px] bg-gold px-4 py-2.5 text-sm font-medium text-ink hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
+      class="mt-5 min-h-11 w-full rounded-[3px] bg-gold px-4 py-2.5 text-sm font-medium text-ink hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
       :disabled="!budgetStore.canDownload || isGeneratingPdf"
       @click="handleDownloadPdf"
     >
