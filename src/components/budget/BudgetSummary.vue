@@ -2,7 +2,6 @@
 import { computed, ref } from "vue";
 import { useBudgetStore } from "@/stores/useBudgetStore";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { num } from "@/utils/parseNumber";
 import { useBudgetPdf } from "@/utils/useBudgetPDF";
 
 const budgetStore = useBudgetStore();
@@ -10,7 +9,7 @@ const { exportarPDF } = useBudgetPdf(budgetStore);
 const isGeneratingPdf = ref(false);
 
 async function handleDownloadPdf() {
-  if (isGeneratingPdf.value || !canDownload.value) {
+  if (isGeneratingPdf.value || !budgetStore.canDownload) {
     return;
   }
 
@@ -30,28 +29,6 @@ const rows = computed(() => [
   { label: "Alojamiento", value: budgetStore.alojamientoTotal },
 ]);
 
-const canDownload = computed(() => {
-  const { cliente, opciones } = budgetStore.formBudget;
-  const clientReady = [cliente.nombre, cliente.evento, cliente.titulo].every(
-    (value) => value.trim() !== "",
-  );
-
-  if (opciones.length === 0) {
-    return false;
-  }
-
-  const optionsReady = opciones.every((opcion) => {
-    if (opcion.lineas.length === 0) {
-      return false;
-    }
-
-    return opcion.lineas.every(
-      (line) => num(line.units) > 0 && num(line.unitPrice) > 0,
-    );
-  });
-
-  return clientReady && optionsReady;
-});
 </script>
 
 <template>
@@ -89,7 +66,7 @@ const canDownload = computed(() => {
     <button
       type="button"
       class="mt-5 w-full rounded-[3px] bg-gold px-4 py-2.5 text-sm font-medium text-ink hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
-      :disabled="!canDownload || isGeneratingPdf"
+      :disabled="!budgetStore.canDownload || isGeneratingPdf"
       @click="handleDownloadPdf"
     >
       {{ isGeneratingPdf ? "Generando PDF..." : "Descargar PDF" }}
