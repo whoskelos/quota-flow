@@ -49,7 +49,8 @@ async function registerMontserratOnDoc(doc) {
 // Paleta extraída del diseño de referencia
 const NAVY = [24, 0, 173]; // título, FECHA, DESTINATARIO
 const TABLE_HEADER = [11, 54, 97]; // cabecera de la tabla
-const DISCOUNT_BG = [242, 171, 42]; // fila de descuento
+const GOLD = [242, 171, 42]; // acento marca (logo, separadores)
+const DISCOUNT_BG = GOLD; // fila de descuento
 const TOTAL_BG = [255, 214, 151]; // fila de total
 const WHITE = [255, 255, 255];
 const TEXT_DARK = [30, 30, 30];
@@ -70,6 +71,14 @@ function formatFecha(iso) {
   if (!iso) return "";
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
+}
+
+/** jsPDF posiciona por baseline; calcula Y de baseline para alinear el borde superior. */
+function baselineYForTextTop(doc, topY, fontSizePt) {
+  const scale = doc.internal.scaleFactor;
+  const ascenderMm =
+    (fontSizePt * doc.getLineHeightFactor() * 0.76) / scale;
+  return topY + ascenderMm;
 }
 
 function loadImage(src) {
@@ -98,57 +107,85 @@ export function useBudgetPdf(budget) {
     let y = 18;
 
     // --- Logo + nombre ---
+    const logoSize = 30;
+    const logoTextGap = 3;
     try {
       const logoImg = await loadImage(logoUrl);
-      doc.addImage(logoImg, "PNG", marginX, y, 20, 20);
+      doc.addImage(logoImg, "PNG", marginX, y, logoSize, logoSize);
     } catch {
       // si el logo no carga, seguimos sin bloquear la descarga
     }
 
+    const brandX = marginX + logoSize + logoTextGap;
+
     doc.setFont(pdfFont, "bold");
     doc.setFontSize(19);
     doc.setTextColor(...NAVY);
-    doc.text("AERIA", marginX + 26, y + 8);
-    doc.text("TROIS", marginX + 26, y + 16);
+    doc.text("AERIA", brandX, y + 8);
+    doc.text("TROIS", brandX, y + 16);
+
+    const brandTextWidth = Math.max(
+      doc.getTextWidth("AERIA"),
+      doc.getTextWidth("TROIS"),
+    );
+    const separatorY = y + 18.5;
+    const separatorH = 0.9;
+    doc.setFillColor(...GOLD);
+    doc.rect(brandX, separatorY, brandTextWidth, separatorH, "F");
 
     doc.setFont(pdfFont, "normal");
     doc.setFontSize(8.5);
-    doc.setTextColor(...TEXT_DARK);
-    doc.text("GRUPO ARTÍSTICO", marginX + 26, y + 22);
-
-    y += 34;
-
-    // --- Título del documento ---
-    doc.setFont(pdfFont, "bold");
-    doc.setFontSize(17);
     doc.setTextColor(...NAVY);
-    doc.text((f.cliente.titulo || "Presupuesto").toUpperCase(), marginX, y);
+    doc.text("GRUPO ARTÍSTICO", brandX, y + 24);
 
-    // --- Fecha (izquierda) ---
-    doc.setFontSize(10);
-    doc.setFont(pdfFont, "bold");
-    doc.text("FECHA:", marginX, y + 12);
-    doc.setFont(pdfFont, "normal");
-    doc.text(formatFecha(f.cliente.fechaEmision), marginX + 16, y + 12);
+    y += 36;
 
-    // --- Destinatario (derecha) ---
     const destX = marginX + 95;
+    const colGap = 4;
+    const titleWidth = destX - marginX - colGap;
     const destWidth = pageW - destX - marginX;
-    const lineH = doc.getLineHeight() / doc.internal.scaleFactor;
+    const metaTopY = y;
+    const destLabelSize = 10;
+    const titleSize = 17;
+
+    // Título y DESTINATARIO alineados por el borde superior (no por baseline)
+    doc.setTextColor(...NAVY);
+
     doc.setFont(pdfFont, "bold");
-    doc.text("DESTINATARIO:", destX, y - 6);
+    doc.setFontSize(destLabelSize);
+    const destLineH = doc.getLineHeight() / doc.internal.scaleFactor;
+    const destBaselineY = baselineYForTextTop(doc, metaTopY, destLabelSize);
+    doc.text("DESTINATARIO:", destX, destBaselineY);
+
+    doc.setFontSize(titleSize);
+    const tituloText = (f.cliente.titulo || "Presupuesto").toUpperCase();
+    const titleLines = doc.splitTextToSize(tituloText, titleWidth);
+    const titleBaselineY = baselineYForTextTop(doc, metaTopY, titleSize);
+    doc.text(titleLines, marginX, titleBaselineY);
+    const titleLineH = doc.getLineHeight() / doc.internal.scaleFactor;
+    const titleEndY = titleBaselineY + titleLines.length * titleLineH;
+
+    doc.setFontSize(destLabelSize);
     doc.setFont(pdfFont, "normal");
     const destLines = doc.splitTextToSize(f.cliente.nombre || "", destWidth);
-    doc.text(destLines, destX, y);
+    const destContentY = destBaselineY + destLineH;
+    doc.text(destLines, destX, destContentY);
 
-    let destEndY = y + destLines.length * lineH;
+    let destEndY = destContentY + destLines.length * destLineH;
     if (f.cliente.evento) {
       const eventoLines = doc.splitTextToSize(f.cliente.evento, destWidth);
       doc.text(eventoLines, destX, destEndY + 1);
-      destEndY += eventoLines.length * lineH + 1;
+      destEndY += eventoLines.length * destLineH + 1;
     }
 
-    const fechaBottomY = y + 12 + lineH;
+    // --- Fecha (izquierda, debajo del título) ---
+    const fechaY = titleEndY + 6;
+    doc.setFont(pdfFont, "bold");
+    doc.text("FECHA:", marginX, fechaY);
+    doc.setFont(pdfFont, "normal");
+    doc.text(formatFecha(f.cliente.fechaEmision), marginX + 16, fechaY);
+
+    const fechaBottomY = fechaY + destLineH;
     y = Math.max(fechaBottomY, destEndY) + 8;
 
     const pageH = doc.internal.pageSize.getHeight();
