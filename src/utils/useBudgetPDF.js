@@ -1,6 +1,50 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoUrl from "@/assets/images/aeriatrois-logo.png";
+import montserratRegularUrl from "@/assets/fonts/Montserrat-Regular.ttf?url";
+import montserratBoldUrl from "@/assets/fonts/Montserrat-Bold.ttf?url";
+
+const PDF_FONT_FAMILY = "Montserrat";
+
+/** Base64 del TTF; el vFS de jsPDF es por instancia de documento. */
+let montserratFontDataPromise = null;
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+async function loadMontserratFontData() {
+  if (!montserratFontDataPromise) {
+    montserratFontDataPromise = (async () => {
+      const [regularRes, boldRes] = await Promise.all([
+        fetch(montserratRegularUrl),
+        fetch(montserratBoldUrl),
+      ]);
+      if (!regularRes.ok || !boldRes.ok) {
+        throw new Error("Montserrat font fetch failed");
+      }
+      return {
+        regular: arrayBufferToBase64(await regularRes.arrayBuffer()),
+        bold: arrayBufferToBase64(await boldRes.arrayBuffer()),
+      };
+    })();
+  }
+  return montserratFontDataPromise;
+}
+
+/** Registra Montserrat en el doc (README jsPDF: addFileToVFS + addFont + setFont). */
+async function registerMontserratOnDoc(doc) {
+  const { regular, bold } = await loadMontserratFontData();
+  doc.addFileToVFS("Montserrat-Regular.ttf", regular);
+  doc.addFont("Montserrat-Regular.ttf", PDF_FONT_FAMILY, "normal");
+  doc.addFileToVFS("Montserrat-Bold.ttf", bold);
+  doc.addFont("Montserrat-Bold.ttf", PDF_FONT_FAMILY, "bold");
+}
 
 // Paleta extraída del diseño de referencia
 const NAVY = [24, 0, 173]; // título, FECHA, DESTINATARIO
@@ -42,6 +86,13 @@ export function useBudgetPdf(budget) {
   async function exportarPDF(formBudget = budget.formBudget) {
     const f = formBudget;
     const doc = new jsPDF({ unit: "mm", format: "a4" });
+    let pdfFont = "helvetica";
+    try {
+      await registerMontserratOnDoc(doc);
+      pdfFont = PDF_FONT_FAMILY;
+    } catch {
+      // jsPDF incluye helvetica; seguimos si Montserrat no carga
+    }
     const pageW = doc.internal.pageSize.getWidth();
     const marginX = 18;
     let y = 18;
@@ -54,13 +105,13 @@ export function useBudgetPdf(budget) {
       // si el logo no carga, seguimos sin bloquear la descarga
     }
 
-    doc.setFont("helvetica", "bold");
+    doc.setFont(pdfFont, "bold");
     doc.setFontSize(19);
     doc.setTextColor(...NAVY);
     doc.text("AERIA", marginX + 26, y + 8);
     doc.text("TROIS", marginX + 26, y + 16);
 
-    doc.setFont("helvetica", "normal");
+    doc.setFont(pdfFont, "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...TEXT_DARK);
     doc.text("GRUPO ARTÍSTICO", marginX + 26, y + 22);
@@ -68,25 +119,25 @@ export function useBudgetPdf(budget) {
     y += 34;
 
     // --- Título del documento ---
-    doc.setFont("helvetica", "bold");
+    doc.setFont(pdfFont, "bold");
     doc.setFontSize(17);
     doc.setTextColor(...NAVY);
     doc.text((f.cliente.titulo || "Presupuesto").toUpperCase(), marginX, y);
 
     // --- Fecha (izquierda) ---
     doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
+    doc.setFont(pdfFont, "bold");
     doc.text("FECHA:", marginX, y + 12);
-    doc.setFont("helvetica", "normal");
+    doc.setFont(pdfFont, "normal");
     doc.text(formatFecha(f.cliente.fechaEmision), marginX + 16, y + 12);
 
     // --- Destinatario (derecha) ---
     const destX = marginX + 95;
     const destWidth = pageW - destX - marginX;
     const lineH = doc.getLineHeight() / doc.internal.scaleFactor;
-    doc.setFont("helvetica", "bold");
+    doc.setFont(pdfFont, "bold");
     doc.text("DESTINATARIO:", destX, y - 6);
-    doc.setFont("helvetica", "normal");
+    doc.setFont(pdfFont, "normal");
     const destLines = doc.splitTextToSize(f.cliente.nombre || "", destWidth);
     doc.text(destLines, destX, y);
 
@@ -192,7 +243,7 @@ export function useBudgetPdf(budget) {
         body,
         theme: "plain",
         styles: {
-          font: "helvetica",
+          font: pdfFont,
           fontSize: 9.5,
           cellPadding: 3,
           textColor: TEXT_DARK,
@@ -237,7 +288,7 @@ export function useBudgetPdf(budget) {
       doc.addPage();
       finalY = 18;
     }
-    doc.setFont("helvetica", "bold");
+    doc.setFont(pdfFont, "bold");
     doc.setFontSize(12);
     doc.setTextColor(...NAVY);
     doc.text(f.iva, pageW - marginX, finalY, { align: "right" });
