@@ -22,6 +22,7 @@ export const useBudgetStore = defineStore("budget", () => {
     dietas: { activo: false, personas: 0, precio: 0, dias: 1 },
     transporte: { activo: false, km: 0, precio: 0, idaVuelta: false },
     alojamiento: { activo: false, unidades: 0, precio: 0 },
+    serviciosExtras: [],
     iva: "+ IVA",
   });
 
@@ -44,6 +45,25 @@ export const useBudgetStore = defineStore("budget", () => {
 
   const removeOfferAt = (optionIndex, lineIndex) => {
     formBudget.opciones[optionIndex].lineas.splice(lineIndex, 1);
+  };
+
+  const addServicioExtra = () => {
+    formBudget.serviciosExtras.push({
+      id: crypto.randomUUID(),
+      descripcion: "",
+      horas: 0,
+      precioHora: 0,
+    });
+  };
+
+  const removeServicioExtra = (servicioId) => {
+    const index = formBudget.serviciosExtras.findIndex(
+      (servicio) => servicio.id === servicioId,
+    );
+    if (index === -1) {
+      return;
+    }
+    formBudget.serviciosExtras.splice(index, 1);
   };
 
   const dietasTotal = computed(() => {
@@ -70,8 +90,20 @@ export const useBudgetStore = defineStore("budget", () => {
     return num(unidades) * num(precio);
   });
 
+  const serviciosExtrasTotal = computed(() => {
+    return formBudget.serviciosExtras.reduce(
+      (acc, servicio) => acc + num(servicio.horas) * num(servicio.precioHora),
+      0,
+    );
+  });
+
   const extrasTotal = computed(() => {
-    return dietasTotal.value + transporteTotal.value + alojamientoTotal.value;
+    return (
+      dietasTotal.value +
+      transporteTotal.value +
+      alojamientoTotal.value +
+      serviciosExtrasTotal.value
+    );
   });
 
   const optionTotals = computed(() => {
@@ -96,12 +128,19 @@ export const useBudgetStore = defineStore("budget", () => {
   });
 
   const canDownload = computed(() => {
-    const { cliente, opciones } = formBudget;
+    const { cliente, opciones, serviciosExtras } = formBudget;
     const clientReady = [cliente.nombre, cliente.evento, cliente.titulo].every(
       (value) => value.trim() !== "",
     );
+    const extrasReady = serviciosExtras.every((servicio) => {
+      return (
+        servicio.descripcion.trim() !== "" &&
+        num(servicio.horas) > 0 &&
+        num(servicio.precioHora) > 0
+      );
+    });
 
-    if (!clientReady || opciones.length === 0) {
+    if (!clientReady || !extrasReady || opciones.length === 0) {
       return false;
     }
 
@@ -132,9 +171,12 @@ export const useBudgetStore = defineStore("budget", () => {
     removeOption,
     addOffer,
     removeOfferAt,
+    addServicioExtra,
+    removeServicioExtra,
     dietasTotal,
     transporteTotal,
     alojamientoTotal,
+    serviciosExtrasTotal,
     extrasTotal,
     optionTotals,
     canDownload,
