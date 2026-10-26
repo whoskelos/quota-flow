@@ -27,6 +27,7 @@ const rows = computed(() => [
   { label: "Dietas", value: budgetStore.dietasTotal },
   { label: "Transporte", value: budgetStore.transporteTotal },
   { label: "Alojamiento", value: budgetStore.alojamientoTotal },
+  { label: "Servicios extras", value: budgetStore.serviciosExtrasTotal },
 ]);
 
 </script>

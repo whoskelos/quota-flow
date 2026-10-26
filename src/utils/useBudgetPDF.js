@@ -249,6 +249,20 @@ export function useBudgetPdf(budget) {
         rowStyles.push(null);
       }
 
+      f.serviciosExtras.forEach((servicio) => {
+        const importe = num(servicio.horas) * num(servicio.precioHora);
+        if (importe <= 0) {
+          return;
+        }
+        body.push([
+          servicio.descripcion,
+          String(num(servicio.horas)),
+          money(num(servicio.precioHora)),
+          money(importe),
+        ]);
+        rowStyles.push(null);
+      });
+
       body.push([
         {
           content: totals.isManual

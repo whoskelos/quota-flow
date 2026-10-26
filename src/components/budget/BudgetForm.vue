@@ -1,6 +1,7 @@
 <script setup>
 import AccommodationSection from "./AccommodationSection.vue";
 import BudgetSummary from "./BudgetSummary.vue";
+import ExtraServicesSection from "./ExtraServicesSection.vue";
 import ClientEventSection from "./ClientEventSection.vue";
 import OfferLinesSection from "./OfferLinesSection.vue";
 import PerDiemSection from "./PerDiemSection.vue";
@@ -55,6 +56,8 @@ const budgetStore = useBudgetStore();
       >
         <AccommodationSection />
       </ToggleSection>
+
+      <ExtraServicesSection />
 
       <TotalsSection />
     </form>
