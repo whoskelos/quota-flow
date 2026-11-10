@@ -1,6 +1,8 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoUrl from "@/assets/images/aeriatrois-logo.png";
+import cortinasUrl from "@/assets/images/cortinas-de-seda.png";
+import artistaUrl from "@/assets/images/artista-aerea.png";
 import montserratRegularUrl from "@/assets/fonts/Montserrat-Regular.ttf?url";
 import montserratBoldUrl from "@/assets/fonts/Montserrat-Bold.ttf?url";
 
@@ -105,6 +107,27 @@ export function useBudgetPdf(budget) {
     const pageW = doc.internal.pageSize.getWidth();
     const marginX = 18;
     let y = 18;
+
+    // --- Decoración de cabecera (fondo): artista opacada + cortinas ---
+    const [cortinasImg, artistaImg] = await Promise.all([
+      loadImage(cortinasUrl).catch(() => null),
+      loadImage(artistaUrl).catch(() => null),
+    ]);
+
+    if (artistaImg) {
+      const artistaW = 52;
+      const artistaH = (artistaW * artistaImg.height) / artistaImg.width;
+      doc.saveGraphicsState();
+      doc.setGState(new doc.GState({ opacity: 0.18 }));
+      doc.addImage(artistaImg, "PNG", pageW - artistaW - 2, 22, artistaW, artistaH);
+      doc.restoreGraphicsState();
+    }
+
+    if (cortinasImg) {
+      const cortinasW = 140;
+      const cortinasH = (cortinasW * cortinasImg.height) / cortinasImg.width;
+      doc.addImage(cortinasImg, "PNG", pageW - cortinasW, 0, cortinasW, cortinasH);
+    }
 
     // --- Logo + nombre ---
     const logoSize = 30;
